@@ -1,6 +1,6 @@
 import { goals } from "mineflayer-pathfinder";
 
-async function mineBlock(bot, name, count = 1) {
+async function mineBlock(mcData, bot, name, count = 1) {
     bot.chat(`Mining ${name}`);
     // return if name is not string
     if (typeof name !== "string") {

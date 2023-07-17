@@ -3,12 +3,13 @@ import { mineflayer as  mineflayerViewer } from 'prismarine-viewer';
 
 import 'dotenv/config'
 
-import { OpenAI } from "langchain/llms/openai";
+const { Configuration, OpenAIApi } = require("openai");
 
 import { goals } from "mineflayer-pathfinder";
 import { Vec3 } from 'vec3';
 
 import * as inventoryViewer from 'mineflayer-web-inventory'
+import * as fs from 'fs'
 
 const mcData = require('minecraft-data')('1.19.4')
 
@@ -19,9 +20,12 @@ const bot = mineflayer.createBot({
   accessToken: '123'
 });
 
-const model = new OpenAI({
-  modelName: "gpt-4",
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
 });
+const openai = new OpenAIApi(configuration);
+
+const PROMPT = fs.readFileSync("./src/prompt.txt", "utf-8");
 
 /**
  * Fetch next command
@@ -223,6 +227,8 @@ async function craftItem(bot, name, count = 1) {
 }
 
 
+
+
 // async function checkForCrafting(bot, log, plank) {
 //   const plankCount = bot.inventory.count(plank);
 
@@ -343,12 +349,7 @@ bot.on('chat', async (username, message) => {
     return;
   }
 
-  if(message == 'explore') {
-    exploreUntil(bot, new Vec3(1, 0, 0), 5);
-    return;
-  }
-
-  if (message = 'leash') {
+  if (message === 'leash') {
     const jurchenPosition = bot.players['jurchen']?.entity?.position;
     if(!jurchenPosition) {
       bot.chat('I cant see you')
@@ -358,20 +359,50 @@ bot.on('chat', async (username, message) => {
     bot.pathfinder.setGoal(new goals.GoalNear(jurchenPosition.x, jurchenPosition.y, jurchenPosition.z, 1))
   }
 
-  if(message == 'what') {
-    bot.chat(`I have ${bot.inventory.items().length} items`)
-    const logsCount = bot.inventory.count(mcData.itemsByName.acacia_log.id, null);
-    bot.chat(`I have ${logsCount} logs`)
-    return;
-  }
+  // if(message === 'what') {
+  //   bot.chat(`I have ${bot.inventory.items().length} items`)
+  //   const logsCount = bot.inventory.count(mcData.itemsByName.acacia_log.id, null);
+  //   bot.chat(`I have ${logsCount} logs`)
+  //   return;
+  // }
 
-  if (message === 'craft') {
-    craftCraftingTable(bot);
-    return;
-  }
+  // if (message === 'craft') {
+  //   craftCraftingTable(bot);
+  //   return;
+  // }
+
+  /**
+   * GPT
+   */
+  const prompt = `
+    ${message}
+  `
+
+  const chatCompletion = await openai.createChatCompletion({
+    model: "gpt-3.5-turbo",
+    messages: [
+      {role: "system", content: PROMPT},
+      {role: "user", content: `Task: ${message}`}
+    ],
+  });
+  console.warn(chatCompletion.data.choices[0].message);
+
+  eval('bot.chat("hello")')
+
+  
+
 
   // bot.chat(resA)
 })
+
+
+
+
+
+
+
+
+
 
 bot.on('goal_reached', (goal) => {
   bot.chat('I here')
