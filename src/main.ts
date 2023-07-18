@@ -10,11 +10,11 @@ import { goals } from "mineflayer-pathfinder";
 import * as inventoryViewer from 'mineflayer-web-inventory'
 import * as fs from 'fs'
 
-import mineBlock from './primitives/mineBlock';
 import mineWoodLog from './primitives/mineWoodLog';
-import { getEntities, getEquipment, getSurroundingBlocks } from './lib';
+import { getEntities, getEquipment, getSurroundingBlocks, getTime } from './lib';
 
-const mcData = require('minecraft-data')('1.19.4')
+
+import * as babel from '@babel/core';
 
 const bot = mineflayer.createBot({
   host: 'localhost',
@@ -29,6 +29,18 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 const PROMPT = fs.readFileSync("./src/prompt.txt", "utf-8");
+
+const CRAFT_HELPER = fs.readFileSync("./src/primitives2/craftHelper.js", "utf-8");
+const CRAFT_ITEM = fs.readFileSync("./src/primitives2/craftItem.js", "utf-8");
+const EXPLORE_UNTIL = fs.readFileSync("./src/primitives2/exploreUntil.js", "utf-8");
+const GIVE_PLACED_ITEM_BACK = fs.readFileSync("./src/primitives2/givePlacedItemBack.js", "utf-8");
+const KILL_MOB = fs.readFileSync("./src/primitives2/killMob.js", "utf-8");
+const MINE_BLOCK = fs.readFileSync("./src/primitives2/mineBlock.js", "utf-8");
+const PLACE_ITEM = fs.readFileSync("./src/primitives2/placeItem.js", "utf-8");
+const SHOOT = fs.readFileSync("./src/primitives2/shoot.js", "utf-8");
+const SMELT_ITEM = fs.readFileSync("./src/primitives2/smeltItem.js", "utf-8");
+const USE_CHEST = fs.readFileSync("./src/primitives2/useChest.js", "utf-8");
+const WAIT_FOR_MOB_REMOVED = fs.readFileSync("./src/primitives2/waitForMobRemoved.js", "utf-8");
 
 /**
  * Fetch next command
@@ -65,24 +77,7 @@ bot.on('chat', async (username, message) => {
   const inventoryUsed = bot.inventory.slots.filter((slot) => slot).length
   const inventory = bot.inventory.items().map((item) => `${item.name}:${item.count}`).join(', ')
   const biome = bot.blockAt(bot.entity.position)?.biome?.name || 'Unknown'
-  const timeOfDay = bot.time.timeOfDay;
-  let time = "(unknown)";
-  if (timeOfDay < 1000) {
-    time = "sunrise";
-  } else if (timeOfDay < 6000) {
-    time = "day";
-  } else if (timeOfDay < 12000) {
-    time = "noon";
-  } else if (timeOfDay < 13000) {
-    time = "sunset";
-  } else if (timeOfDay < 18000) {
-    time = "night";
-  } else if (timeOfDay < 22000) {
-    time = "midnight";
-  } else {
-    time = "sunrise";
-  }
-
+  const time = getTime(bot);
   const equipment = getEquipment(bot).join(', ');
   const entities = getEntities(bot); // TODO: figure out mapping dict
   const blocks = [...getSurroundingBlocks(bot, 8, 2, 8)]
@@ -112,23 +107,88 @@ bot.on('chat', async (username, message) => {
   console.log(prompt)
   console.log("\n\n\n\n")
 
-  const chatCompletion = await openai.createChatCompletion({
-    model: "gpt-4",
-    messages: [
-      {role: "system", content: PROMPT},
-      {role: "user", content: `Task: ${message}`}
-    ],
-  }); 
+  // const chatCompletion = await openai.createChatCompletion({
+  //   model: "gpt-4",
+  //   messages: [
+  //     {role: "system", content: PROMPT},
+  //     {role: "user", content: `Task: ${message}`}
+  //   ],
+  // }); 
 
-  const responseContent = chatCompletion.data.choices[0].message.content;
+  // const responseContent = chatCompletion.data.choices[0].message.content;
 
-  console.log(responseContent);
+  // console.log(responseContent);
 
-  const code = responseContent.split("Code:\n```javascript")[1];
+  // switch to using regex
+  // const code = responseContent.split("Code:\n```javascript")[1].slice(0, -3);
+
+  const code = `
+  async function craftAndPlaceCraftingTable(bot) {
+    // Check if crafting_table is already present
+    let craftingTable = bot.inventory.findInventoryItem(bot.registry.itemsByName["crafting_table"].id);
+    if (craftingTable) {
+        bot.chat("Crafting table found in inventory");
+        await placeItem(bot, "crafting_table", bot.entity.position.offset(1, 0, 0));
+    } else {
+        bot.chat("Crafting table not found in inventory. Checking for oak log...");
+        let oakLog = bot.inventory.findInventoryItem(bot.registry.itemsByName["oak_log"].id);
+        if (oakLog) {
+            bot.chat("Oak logs found in inventory. Crafting crafting_table...");
+        } else {            
+            bot.chat("Oak logs not found in inventory. Mining oak_log...");
+            await mineBlock(bot, "oak_log", 1);
+            bot.chat("Finished mining oak logs. Crafting crafting_table...");
+        }
+        await craftItem(bot, "crafting_table", 1);    
+        bot.chat("Finished crafting crafting_table. Placing the crafting_table...");
+        await placeItem(bot, "crafting_table", bot.entity.position.offset(1, 0, 0));
+    }
+    bot.chat("Crafting table placed successfully.");
+}
+`
+  const parsed = babel.parse(code).program.body
+
+  // last async function
+  const functionName = parsed[0].id.name
+
+
+  // parse code, check validity
+
+  // get the function name
 
   console.log(code);
 
-  eval('bot.chat("hello")')
+  // TODO: cleaner env definition
+  const program = `
+const { goals } = require('mineflayer-pathfinder');
+const { GoalPlaceBlock, GoalNear, GoalNearXZ, GoalXZ, GoalGetToBlock, GoalFollow, GoalLookAtBlock } = goals;
+const { Vec3 } = require('vec3');
+
+${CRAFT_HELPER}
+${CRAFT_ITEM}
+${EXPLORE_UNTIL}
+${GIVE_PLACED_ITEM_BACK}
+${KILL_MOB}
+${MINE_BLOCK}
+${PLACE_ITEM}
+${SHOOT}
+${SMELT_ITEM}
+${USE_CHEST}
+${WAIT_FOR_MOB_REMOVED}
+
+let _mineBlockFailCount = 0;
+let _placeItemFailCount = 0;
+let _craftItemFailCount = 0;
+let _killMobFailCount = 0;
+let _smeltItemFailCount = 0;
+
+${code}
+
+${functionName}(bot);
+`;
+
+  console.log(program)
+  eval(program)
 })
 
 bot.on('goal_reached', (goal) => {

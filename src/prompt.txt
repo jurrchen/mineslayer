@@ -6,7 +6,7 @@ Here are some useful programs written with Mineflayer APIs.
 Explore until find an iron_ore, use Vec3(0, -1, 0) because iron ores are usually underground
 await exploreUntil(bot, new Vec3(0, -1, 0), 60, () => {
     const iron_ore = bot.findBlock({
-        matching: mcData.blocksByName["iron_ore"].id,
+        matching: bot.registry.blocksByName["iron_ore"].id,
         maxDistance: 32,
     });
     return iron_ore;
@@ -53,9 +53,9 @@ async function mineBlock(bot, name, count = 1) {
 // Craft 8 oak_planks from 2 oak_log (do the recipe 2 times): craftItem(bot, "oak_planks", 2);
 // You must place a crafting table before calling this function
 async function craftItem(bot, name, count = 1) {
-    const item = mcData.itemsByName[name];
+    const item = bot.registry.itemsByName[name];
     const craftingTable = bot.findBlock({
-        matching: mcData.blocksByName.crafting_table.id,
+        matching: bot.registry.blocksByName.crafting_table.id,
         maxDistance: 32,
     });
     await bot.pathfinder.goto(
@@ -68,7 +68,7 @@ async function craftItem(bot, name, count = 1) {
 
 // Place a crafting_table near the player, Vec3(1, 0, 0) is just an example, you shouldn't always use that: placeItem(bot, "crafting_table", bot.entity.position.offset(1, 0, 0));
 async function placeItem(bot, name, position) {
-    const item = bot.inventory.findInventoryItem(mcData.itemsByName[name].id);
+    const item = bot.inventory.findInventoryItem(bot.registry.itemsByName[name].id);
     // find a reference block
     const faceVectors = [
         new Vec3(0, 1, 0),
@@ -99,10 +99,10 @@ async function placeItem(bot, name, position) {
 // Smelt 1 raw_iron into 1 iron_ingot using 1 oak_planks as fuel: smeltItem(bot, "raw_iron", "oak_planks");
 // You must place a furnace before calling this function
 async function smeltItem(bot, itemName, fuelName, count = 1) {
-    const item = mcData.itemsByName[itemName];
-    const fuel = mcData.itemsByName[fuelName];
+    const item = bot.registry.itemsByName[itemName];
+    const fuel = bot.registry.itemsByName[fuelName];
     const furnaceBlock = bot.findBlock({
-        matching: mcData.blocksByName.furnace.id,
+        matching: bot.registry.blocksByName.furnace.id,
         maxDistance: 32,
     });
     await bot.pathfinder.goto(
@@ -141,7 +141,7 @@ async function getItemFromChest(bot, chestPosition, itemsToGet) {
     const chestBlock = bot.blockAt(chestPosition);
     const chest = await bot.openContainer(chestBlock);
     for (const name in itemsToGet) {
-        const itemByName = mcData.itemsByName[name];
+        const itemByName = bot.registry.itemsByName[name];
         const item = chest.findContainerItem(itemByName.id);
         await chest.withdraw(item.type, null, itemsToGet[name]);
     }
@@ -154,7 +154,7 @@ async function depositItemIntoChest(bot, chestPosition, itemsToDeposit) {
     const chestBlock = bot.blockAt(chestPosition);
     const chest = await bot.openContainer(chestBlock);
     for (const name in itemsToDeposit) {
-        const itemByName = mcData.itemsByName[name];
+        const itemByName = bot.registry.itemsByName[name];
         const item = bot.inventory.findInventoryItem(itemByName.id);
         await chest.deposit(item.type, null, itemsToDeposit[name]);
     }

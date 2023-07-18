@@ -10,7 +10,7 @@ export function getEntities(bot) {
       if (entity.position.distanceTo(bot.entity.position) < 32) {
           if (!mobs[entity.name]) {
               mobs[entity.name] = entity.position.distanceTo(
-                  this.bot.entity.position
+                  bot.entity.position
               );
           } else if (
               mobs[entity.name] >
@@ -65,4 +65,26 @@ export function getChests(bot) {
       }
   });
   return this.chestsItems;
+}
+
+export function getTime(bot) {
+  const timeOfDay = bot.time.timeOfDay;
+  let time = "(unknown)";
+  if (timeOfDay < 1000) {
+    time = "sunrise";
+  } else if (timeOfDay < 6000) {
+    time = "day";
+  } else if (timeOfDay < 12000) {
+    time = "noon";
+  } else if (timeOfDay < 13000) {
+    time = "sunset";
+  } else if (timeOfDay < 18000) {
+    time = "night";
+  } else if (timeOfDay < 22000) {
+    time = "midnight";
+  } else {
+    time = "sunrise";
+  }
+
+  return time;
 }
