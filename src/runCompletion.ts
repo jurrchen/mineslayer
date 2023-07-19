@@ -58,82 +58,24 @@ async function runPrompt(bot, task, previousCode = null, previousError = null) {
   console.log(prompt)
   console.log("\n\n\n\n")
 
-  // const chatCompletion = await openai.createChatCompletion({
-  //   model: "gpt-4",
-  //   messages: [
-  //     {role: "system", content: PROMPT},
-  //     {role: "user", content: prompt}
-  //   ],
-  // }); 
+  const chatCompletion = await openai.createChatCompletion({
+    model: "gpt-4",
+    messages: [
+      {role: "system", content: PROMPT},
+      {role: "user", content: prompt}
+    ],
+  }); 
 
-  // const responseContent = chatCompletion.data.choices[0].message.content;
+  const responseContent = chatCompletion.data.choices[0].message.content;
 
-  // console.log(responseContent);
+  console.log(responseContent);
 
-  // // switch to using regex
-  // const code = responseContent.split("```javascript")[1].trim().slice(0, -3)
+  // switch to using regex
+  const code = responseContent.split("```javascript")[1].trim().slice(0, -3)
 
   console.warn('===CODE===')
-  const code = `
-  async function harvestSheep(bot) {
-    // Find a nearby crafting table
-    let craftingTable = bot.findBlock({
-        matching: bot.registry.blocksByName.crafting_table.id,
-        maxDistance: 32,
-    });
-
-    // If no crafting table is found, craft one
-    if (!craftingTable) {
-        // Check if we have planks to craft a crafting table
-        let planks = bot.inventory.findInventoryItem(bot.registry.itemsByName['oak_planks'].id);
-        // If not, mine a tree to get logs and then craft them into planks
-        if (!planks) {
-            await mineBlock(bot, "oak_log", 1);
-            await craftItem(bot, "oak_planks", 1);
-        }
-        // Craft and place the crafting table
-        await craftItem(bot, "crafting_table", 1);
-        const craftingTableItem = bot.inventory.findInventoryItem(bot.registry.itemsByName['crafting_table'].id);
-        await placeItem(bot, 'crafting_table', bot.entity.position.offset(1, 0, 0));
-        
-        craftingTable = bot.blockAt(bot.entity.position.offset(1, 0, 0));
-    }
-
-    // Proceed with your previous steps, with added step to go to crafting table before crafting anything
-    let pickaxe = bot.inventory.findInventoryItem(bot.registry.itemsByName['stone_pickaxe'].id);
-    let shear = bot.inventory.findInventoryItem(bot.registry.itemsByName['shears'].id);
-
-    if (!pickaxe) {
-        await mineBlock(bot, "cobblestone", 3);
-        await bot.pathfinder.goto(new GoalGetToBlock(craftingTable.position.x, craftingTable.position.y, craftingTable.position.z));
-        await craftItem(bot, "stone_pickaxe", 1);
-        pickaxe = bot.inventory.findInventoryItem(bot.registry.itemsByName['stone_pickaxe'].id);
-    }
-
-    if (!shear) {
-        if (pickaxe) {
-            await bot.equip(pickaxe, 'hand');
-        }
-
-        await mineBlock(bot, "iron_ore", 2);
-        await smeltItem(bot, "iron_ore", "oak_planks", 2);
-
-        await bot.pathfinder.goto(new GoalGetToBlock(craftingTable.position.x, craftingTable.position.y, craftingTable.position.z));
-        await craftItem(bot, "shears", 1);
-        shear = bot.inventory.findInventoryItem(bot.registry.itemsByName['shears'].id);
-    }
-
-    await bot.equip(shear, 'hand');
-
-    const sheep = bot.nearestEntity((entity) => {
-        return (
-            entity.name === "sheep" &&
-            entity.position.distanceTo(bot.entity.position) < 32
-        );
-    });
-    await bot.useOn(sheep);
-}  
-`
+//   const code = `  
+// `
   console.warn(code)
   const parsed = babel.parse(code).program.body
   console.warn('=========')
