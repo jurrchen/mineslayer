@@ -2,7 +2,8 @@ import * as mineflayer from 'mineflayer';
 import { mineflayer as  mineflayerViewer } from 'prismarine-viewer';
 import { goals } from "mineflayer-pathfinder";
 import * as inventoryViewer from 'mineflayer-web-inventory'
-import { runCompletion } from './runCompletion';
+import { runCompletion, runExec } from './runCompletion';
+import Observer from './obs';
 
 const bot = mineflayer.createBot({
   host: 'localhost',
@@ -25,8 +26,28 @@ bot.on('chat', async (username, message) => {
       bot.chat('I cant see you')
       return
     }
-    bot.chat('jurchen is at ' + jurchenPosition);    
+    bot.chat('jurchen is at ' + jurchenPosition.x + ' ' + jurchenPosition.y + ' ' + jurchenPosition.z);    
     bot.pathfinder.setGoal(new goals.GoalNear(jurchenPosition.x, jurchenPosition.y, jurchenPosition.z, 1))
+    return;
+  }
+
+  if (message === 'debug') {
+    const code = `
+async function dropInventory(bot) {
+  const inventoryItems = bot.inventory.items();
+  for (const item of inventoryItems) {
+    await bot.tossStack(item);
+  }
+}
+    `
+
+    // create observability object
+
+    const obs = new Observer(bot)
+    await runExec(bot, obs, code)
+
+    // TODO: can test repairs
+
     return;
   }
 
@@ -34,10 +55,6 @@ bot.on('chat', async (username, message) => {
    * GPT
    */
   await runCompletion(bot, message);
-})
-
-bot.on('goal_reached', (goal) => {
-  bot.chat('I here')
 })
 
 // Log errors and kick reasons:

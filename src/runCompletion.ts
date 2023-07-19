@@ -6,6 +6,8 @@ import { getEntities, getEquipment, getSurroundingBlocks, getTime } from './lib'
 import * as babel from '@babel/core';
 
 import 'dotenv/config'
+import Observer from './obs';
+import { Bot } from 'mineflayer';
 
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
@@ -26,7 +28,7 @@ const SMELT_ITEM = fs.readFileSync("./src/primitives/smeltItem.js", "utf-8");
 const USE_CHEST = fs.readFileSync("./src/primitives/useChest.js", "utf-8");
 const WAIT_FOR_MOB_REMOVED = fs.readFileSync("./src/primitives/waitForMobRemoved.js", "utf-8");
 
-async function runPrompt(bot, task, previousCode = null, previousError = null) {
+async function runPrompt(bot: Bot, obs: Observer, task: string, previousObs: Observer | null = null) {
   const inventoryUsed = bot.inventory.slots.filter((slot) => slot).length
   const inventory = bot.inventory.items().map((item) => `${item.name}:${item.count}`).join(', ')
   const biome = bot.blockAt(bot.entity.position)?.biome?.name || 'Unknown'
@@ -36,8 +38,8 @@ async function runPrompt(bot, task, previousCode = null, previousError = null) {
   const blocks = [...getSurroundingBlocks(bot, 8, 2, 8)]
 
   const prompt = `
-    Code from the last round: ${previousCode || "(None)"}
-    Execution error: ${previousError || "(None)"}
+    Code from the last round: ${previousObs.code || "(None)"}
+    Execution error: ${previousObs.error?.toString() || "(None)"}
     Chat log: (None)
     Biome: ${biome}
     Time: ${time}
@@ -73,12 +75,13 @@ async function runPrompt(bot, task, previousCode = null, previousError = null) {
   // switch to using regex
   const code = responseContent.split("```javascript")[1].trim().slice(0, -3)
 
-  console.warn('===CODE===')
-//   const code = `  
-// `
-  console.warn(code)
+  return runExec(bot, obs, code)
+}
+
+
+export async function runExec(bot, obs, code) {
+  obs.setCode(code)
   const parsed = babel.parse(code).program.body
-  console.warn('=========')
 
   // first function is what gets run
   // TODO: handle multiple functions
@@ -116,22 +119,23 @@ async function runPrompt(bot, task, previousCode = null, previousError = null) {
   try {
     bot.chat(`Running code`);
     await eval(program)
-    return [null, code];
   } catch(e) {
-    bot.chat(`I failed to run your code ${e.message}`)
-    return [e, code];
+    this.setError(e)
+    return e
   }
 }
 
 
 export async function runCompletion(bot, message) {
-  const [e, code] = await runPrompt(bot, message)
+  const obs = new Observer(bot)
+  const e = await runPrompt(bot, obs, message)
+  // check obs?
 
   if(e) {
     // try again
-    const [e2, _] = await runPrompt(bot, message, code, e.toString())
+    const obs2 = new Observer(bot)
+    const e2 = await runPrompt(bot, obs2, message, obs)
     if (e2) {
-      console.warn(e2)
       bot.chat('I failed to run your code twice, I give up.')
     }
   }
