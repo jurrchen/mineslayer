@@ -27,6 +27,6 @@ export default class Observer {
   chat(message) {
     console.warn(message)
     this.logs.push(message)
-    this.bot.chat(message)
+    // this.bot.chat(message)
   }
 }

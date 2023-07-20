@@ -1,9 +1,10 @@
 import * as mineflayer from 'mineflayer';
 import { mineflayer as  mineflayerViewer } from 'prismarine-viewer';
 import { goals } from "mineflayer-pathfinder";
-import * as inventoryViewer from 'mineflayer-web-inventory'
-import { runCompletion, runExec } from './runCompletion';
+import inventoryViewer from 'mineflayer-web-inventory'
+import { runCompletion, runExec } from './run';
 import Observer from './obs';
+import stringArgv from 'string-argv';
 
 const bot = mineflayer.createBot({
   host: 'localhost',
@@ -20,40 +21,57 @@ const bot = mineflayer.createBot({
 bot.on('chat', async (username, message) => {
   if (username === bot.username) return
 
-  if (message === 'leash') {
-    const jurchenPosition = bot.players['jurchen']?.entity?.position;
-    if(!jurchenPosition) {
-      bot.chat('I cant see you')
-      return
+  if(message.startsWith('!')) {
+    const parsed = stringArgv(message)
+
+    if (parsed[0] === '!leash')  {
+
+      let goal;
+      if (parsed.length === 4) {
+        goal = {
+          x: parseFloat(parsed[1]),
+          y: parseFloat(parsed[2]), 
+          z: parseFloat(parsed[3]),
+        }
+      } else {
+        const jurchenPosition = bot.players['jurchen']?.entity?.position;
+        if(!jurchenPosition) {
+          bot.chat('I cant see you')
+          return
+        }
+        goal = jurchenPosition;
+      }
+      bot.chat('going to ' + goal.x + ' ' + goal.y + ' ' + goal.z);    
+      bot.pathfinder.setGoal(new goals.GoalNear(goal.x, goal.y, goal.z, 1));
+      return;
     }
-    bot.chat('jurchen is at ' + jurchenPosition.x + ' ' + jurchenPosition.y + ' ' + jurchenPosition.z);    
-    bot.pathfinder.setGoal(new goals.GoalNear(jurchenPosition.x, jurchenPosition.y, jurchenPosition.z, 1))
-    return;
-  }
 
-  if (message === 'debug') {
-    const code = `
-async function dropInventory(bot) {
-  const inventoryItems = bot.inventory.items();
-  for (const item of inventoryItems) {
-    await bot.tossStack(item);
-  }
+    if (parsed[0] === '!debug')  {
+      const code = `
+async function mineOre(bot, obs) {
+  await mineBlock(bot, obs, "diamond_ore", 1);
+  bot.chat('mined ore')
 }
-    `
+      `
 
-    // create observability object
+      // create observability object
 
-    const obs = new Observer(bot)
-    await runExec(bot, obs, code)
+      const obs = new Observer(bot)
+      await runExec(bot, obs, code)
 
-    // TODO: can test repairs
+      // TODO: can test repairs
 
+      return;
+    }
+
+    bot.chat('unknown command')
     return;
   }
 
   /**
    * GPT
    */
+  // await planCompletion(bot, message);
   await runCompletion(bot, message);
 })
 
@@ -66,7 +84,7 @@ bot.on('error', console.log)
 bot.once('spawn', () => {
   const { pathfinder } = require("mineflayer-pathfinder");
   const tool = require("mineflayer-tool").plugin;
-  const collectBlock = require("mineflayer-collectblock").plugin;
+  const collectBlock = require("./collectblock").plugin;
   const pvp = require("mineflayer-pvp").plugin;
   const minecraftHawkEye = require("minecrafthawkeye");
   bot.loadPlugin(pathfinder);

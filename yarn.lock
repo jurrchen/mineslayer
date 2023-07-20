@@ -603,9 +603,9 @@ camelcase@^6.0.0:
   integrity sha512-Gmy6FhYlCY7uOElZUSbxo2UCDH8owEk996gkbrpsgGtrJLM3J7jGxl9Ic7Qwwj4ivOE5AWZWRMecDdF7hqGjFA==
 
 caniuse-lite@^1.0.30001503:
-  version "1.0.30001516"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001516.tgz#621b1be7d85a8843ee7d210fd9d87b52e3daab3a"
-  integrity sha512-Wmec9pCBY8CWbmI4HsjBeQLqDTqV91nFVR83DnZpYyRnPI1wePDsTg0bGLPC5VU/3OIZV1fmxEea1b+tFKe86g==
+  version "1.0.30001517"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001517.tgz#90fabae294215c3495807eb24fc809e11dc2f0a8"
+  integrity sha512-Vdhm5S11DaFVLlyiKu4hiUTkpZu+y1KA/rZZqVQfOD5YdDT/eQKlkt7NaE0WGOFgX32diqt9MiP9CAiFeRklaA==
 
 chalk@^2.0.0:
   version "2.4.2"
@@ -844,9 +844,9 @@ ee-first@1.1.1:
   integrity sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==
 
 electron-to-chromium@^1.4.431:
-  version "1.4.463"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.463.tgz#8eb04355f24fef5c8097661d14e143f6d8554055"
-  integrity sha512-fT3hvdUWLjDbaTGzyOjng/CQhQJSQP8ThO3XZAoaxHvHo2kUXiRQVMj9M235l8uDFiNPsPa6KHT1p3RaR6ugRw==
+  version "1.4.466"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.466.tgz#17193d70f203da3d52a89c653b8d89f47a51d79d"
+  integrity sha512-TSkRvbXRXD8BwhcGlZXDsbI2lRoP8dvqR7LQnqQNk9KxXBc4tG8O+rTuXgTyIpEdiqSGKEBSqrxdqEntnjNncA==
 
 emoji-regex@^8.0.0:
   version "8.0.0"
@@ -1413,9 +1413,9 @@ minecraft-folder-path@^1.2.0:
   integrity sha512-qaUSbKWoOsH9brn0JQuBhxNAzTDMwrOXorwuRxdJKKKDYvZhtml+6GVCUrY5HRiEsieBEjCUnhVpDuQiKsiFaw==
 
 minecraft-protocol@^1.17.0, minecraft-protocol@^1.40.3, minecraft-protocol@^1.43.1:
-  version "1.43.1"
-  resolved "https://registry.yarnpkg.com/minecraft-protocol/-/minecraft-protocol-1.43.1.tgz#5aed16f9d61a283cba30d2355071da148ddb9d94"
-  integrity sha512-/tcC5Ai7/voCgOLVNaYwwAC89Vx7hkmlDkuL7zrelkcFWPMzFb3U8kdDUXRpPraNz6+ltKKSLolysAeYbmX00A==
+  version "1.43.2"
+  resolved "https://registry.yarnpkg.com/minecraft-protocol/-/minecraft-protocol-1.43.2.tgz#e2dde60408b385ea412a990321b5af2abc0deff7"
+  integrity sha512-JFpBLksqlXRWJ0AOBOoXhnfZx0wTWo8SNpYP7MPpKev6jBbx1w/SDU+pgshB60ig+Iw7DUVLj3TYs5U5YkTSwg==
   dependencies:
     "@types/readable-stream" "^2.3.13"
     aes-js "^3.1.2"
@@ -1443,15 +1443,6 @@ minecrafthawkeye@^1.3.6:
   dependencies:
     detect-collisions "^7.0.5"
     vec3 "^0.1.8"
-
-mineflayer-collectblock@^1.4.1:
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/mineflayer-collectblock/-/mineflayer-collectblock-1.4.1.tgz#30f36fd2f68bf1664e5660233bcfc578602b4054"
-  integrity sha512-E5i5nxwx+FVIkJj5TFJpBQkxJ2pvCxN7Ubi2rB20ybPdRArmXr8kM6VwrLFvx0jhvR0z7+u4s5llwCCCMZ1weA==
-  dependencies:
-    mineflayer "^4.0.0"
-    mineflayer-pathfinder "^2.1.1"
-    mineflayer-tool "^1.1.0"
 
 mineflayer-pathfinder@2.4.2:
   version "2.4.2"
@@ -1488,7 +1479,7 @@ mineflayer-pvp@^1.3.2:
     mineflayer-pathfinder "^2.0.0"
     mineflayer-utils "^0.1.4"
 
-mineflayer-tool@^1.1.0, mineflayer-tool@^1.2.0:
+mineflayer-tool@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/mineflayer-tool/-/mineflayer-tool-1.2.0.tgz#a4c27594f7797a4254ee94bbc9ee4620c4253b63"
   integrity sha512-TRd7JOX4obJnzqzVi+4MLKmbeeCDjp9taerLKM8+AGpWfgtdbAguGmsr3BHu+TdXxOIT05veYecCv77S3KX6PA==
@@ -1566,9 +1557,9 @@ mineflayer@^2.27.0:
     vec3 "^0.1.6"
 
 mineflayer@^4.0.0:
-  version "4.10.0"
-  resolved "https://registry.yarnpkg.com/mineflayer/-/mineflayer-4.10.0.tgz#530e68fa15641c332739a6385cbda983eed503e6"
-  integrity sha512-nE1+J0rT9h6qXDYwiLcHbVrvnBz75Up0txENrQ9gE02LYM1j/c2+MoDSU9sG1PwZpA9iZ+a2n8iizbuJZE5lDg==
+  version "4.10.1"
+  resolved "https://registry.yarnpkg.com/mineflayer/-/mineflayer-4.10.1.tgz#da3c31ee9f30d4d35de121915f3ee65d51543bd8"
+  integrity sha512-Ixvovd5wtx7ZYzm5YCqgOVoMqTam0LEEMwfOQGQ7Y3AAPk8Ci1rXOZZDdJmn9XRnloRRR8jv2MjQW2kFl7LyQg==
   dependencies:
     minecraft-data "^3.37.0"
     minecraft-protocol "^1.43.1"
@@ -1831,6 +1822,18 @@ prismarine-biome@^1.1.0, prismarine-biome@^1.1.1, prismarine-biome@^1.2.0, prism
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/prismarine-biome/-/prismarine-biome-1.3.0.tgz#53b122fc7c3968f43f1639e823e7bd1b829fab46"
   integrity sha512-GY6nZxq93mTErT7jD7jt8YS1aPrOakbJHh39seYsJFXvueIOdHAmW16kYQVrTVMW5MlWLQVxV/EquRwOgr4MnQ==
+
+prismarine-block@1.16.3:
+  version "1.16.3"
+  resolved "https://registry.yarnpkg.com/prismarine-block/-/prismarine-block-1.16.3.tgz#465b6b0154be16f8d7b5dc892f4a4153f073d542"
+  integrity sha512-E9OazjIqnEgcXM6me6EIeQFMcNRWZzsaftWtetRSIKVoW+4UKWleb6lTNKh9kq7wNxciKavcYBmKL3sF7HfSaA==
+  dependencies:
+    minecraft-data "^3.0.0"
+    prismarine-biome "^1.1.0"
+    prismarine-chat "^1.5.0"
+    prismarine-item "^1.10.1"
+    prismarine-nbt "^2.0.0"
+    prismarine-registry "^1.1.0"
 
 prismarine-block@^1.13.1, prismarine-block@^1.14.1, prismarine-block@^1.16.3, prismarine-block@^1.17.0, prismarine-block@^1.6.0, prismarine-block@^1.7.3:
   version "1.17.0"
@@ -2283,6 +2286,11 @@ statuses@2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/statuses/-/statuses-2.0.1.tgz#55cb000ccf1d48728bd23c685a063998cf1a1b63"
   integrity sha512-RwNA9Z/7PrK06rYLIzFMlaF+l73iwpzsqRIFgbMLbTcLD6cOao82TaWefPXQvB2fOC4AjuYSEndS7N/mTCbkdQ==
+
+string-argv@^0.3.2:
+  version "0.3.2"
+  resolved "https://registry.yarnpkg.com/string-argv/-/string-argv-0.3.2.tgz#2b6d0ef24b656274d957d54e0a4bbf6153dc02b6"
+  integrity sha512-aqD2Q0144Z+/RqG52NeHEkZauTAUWJO8c6yTftGJKO3Tja5tUgIfmIl6kExvhtxSDP7fXB6DvzkfMpCd/F3G+Q==
 
 string-width@^4.1.0, string-width@^4.2.0:
   version "4.2.3"

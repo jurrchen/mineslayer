@@ -215,7 +215,7 @@ You should then respond to me with
 Explain (if applicable): Are there any steps missing in your plan? Why does the code not complete the task? What does the chat log and execution error imply?
 Plan: How to complete the task step by step. You should pay attention to Inventory since it tells what you have. The task completeness check is also based on your final inventory.
 Code:
-    1) Write an async function taking bot and obs as the only two arguments.
+    1) Write an async function taking bot and obs as the only two arguments. Just return the function. Do not call the function.
     2) Reuse the above useful programs as much as possible.
         - Use `mineBlock(bot, obs, name, count)` to collect blocks. Do not use `bot.dig` directly.
         - Use `craftItem(bot, obs, name, count)` to craft items. Do not use `bot.craft` or `bot.recipesFor` directly.

@@ -1,20 +1,16 @@
 import * as fs from 'fs'
-import { Configuration, OpenAIApi } from "openai";
 
 import { getEntities, getEquipment, getSurroundingBlocks, getTime } from './lib';
 
 import * as babel from '@babel/core';
 
-import 'dotenv/config'
 import Observer from './obs';
 import { Bot } from 'mineflayer';
+import { openAICompletion } from './openai';
 
-const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-const openai = new OpenAIApi(configuration);
 
-const PROMPT = fs.readFileSync("./src/prompt.txt", "utf-8");
+
+const PROMPT = fs.readFileSync("./src/prompts/code.txt", "utf-8");
 
 const CRAFT_HELPER = fs.readFileSync("./src/primitives/craftHelper.js", "utf-8");
 const CRAFT_ITEM = fs.readFileSync("./src/primitives/craftItem.js", "utf-8");
@@ -59,20 +55,19 @@ async function runPrompt(bot: Bot, obs: Observer, task: string, previousObs: Obs
   console.log(prompt)
   console.log("\n\n\n\n")
 
-  const chatCompletion = await openai.createChatCompletion({
-    model: "gpt-4",
-    messages: [
-      {role: "system", content: PROMPT},
-      {role: "user", content: prompt}
-    ],
-  }); 
+  const chatCompletion = await openAICompletion(PROMPT, prompt);
 
   const responseContent = chatCompletion.data.choices[0].message.content;
 
   console.log(responseContent);
 
   // switch to using regex
-  const code = responseContent.split("```javascript")[1].trim().slice(0, -3)
+  const regex = /```javascript(.*?)```/gs;
+  const match = regex.exec(responseContent);
+  if (!match) {
+    throw new Error("No code found in response");
+  }
+  const code = match[1];
 
   return runExec(bot, obs, code)
 }
@@ -86,8 +81,6 @@ function getFunctionName(code: string) {
 
 export async function runExec(bot: Bot, obs: Observer, code: string) {
   obs.setCode(code)
-  const parsed = babel.parse(code).program.body
-
   // first function is what gets run
   // TODO: handle multiple functions
   const functionName = getFunctionName(code)
