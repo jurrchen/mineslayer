@@ -1,4 +1,4 @@
-function failedCraftFeedback(bot, name, item, craftingTable) {
+function failedCraftFeedback(bot, obs, name, item, craftingTable) {
   const recipes = bot.recipesAll(item.id, null, craftingTable);
   if (!recipes.length) {
       throw new Error(`No crafting table nearby`);
@@ -56,6 +56,6 @@ function failedCraftFeedback(bot, name, item, craftingTable) {
               }
           }
       }
-      bot.chat(`I cannot make ${name} because I need: ${message}`);
+      obs.chat(`I cannot make ${name} because I need: ${message}`);
   }
 }

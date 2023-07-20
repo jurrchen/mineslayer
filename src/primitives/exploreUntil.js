@@ -1,6 +1,7 @@
 // Explore downward for 60 seconds: exploreUntil(bot, new Vec3(0, -1, 0), 60);
 async function exploreUntil(
   bot,
+  obs,
   direction,
   maxTime = 60,
   callback = () => {
@@ -15,7 +16,7 @@ async function exploreUntil(
   }
   const test = callback();
   if (test) {
-      bot.chat("Explore success.");
+      obs.chat("Explore success.");
       return Promise.resolve(test);
   }
   if (direction.x === 0 && direction.y === 0 && direction.z === 0) {
@@ -67,7 +68,7 @@ async function exploreUntil(
               const result = callback();
               if (result) {
                   cleanUp();
-                  bot.chat("Explore success.");
+                  obs.chat("Explore success.");
                   resolve(result);
               }
           } catch (err) {
@@ -80,7 +81,7 @@ async function exploreUntil(
 
       maxTimeTimeout = setTimeout(() => {
           cleanUp();
-          bot.chat("Max exploration time reached");
+          obs.chat("Max exploration time reached");
           resolve(null);
       }, maxTime * 1000);
   });

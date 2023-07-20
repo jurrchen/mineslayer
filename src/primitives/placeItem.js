@@ -1,4 +1,4 @@
-async function placeItem(bot, name, position) {
+async function placeItem(bot, obs, name, position) {
   // return if name is not string
   if (typeof name !== "string") {
       throw new Error(`name for placeItem must be a string`);
@@ -13,7 +13,7 @@ async function placeItem(bot, name, position) {
   }
   const item = bot.inventory.findInventoryItem(itemByName.id);
   if (!item) {
-      bot.chat(`No ${name} in inventory`);
+      obs.chat(`No ${name} in inventory`);
       return;
   }
   const item_count = item.count;
@@ -38,7 +38,7 @@ async function placeItem(bot, name, position) {
       }
   }
   if (!referenceBlock) {
-      bot.chat(
+      obs.chat(
           `No block to place ${name} on. You cannot place a floating block.`
       );
       _placeItemFailCount++;
@@ -57,12 +57,12 @@ async function placeItem(bot, name, position) {
       // You must equip the item right before calling placeBlock
       await bot.equip(item, "hand");
       await bot.placeBlock(referenceBlock, faceVector);
-      bot.chat(`Placed ${name}`);
+      obs.chat(`Placed ${name}`);
     //   bot.save(`${name}_placed`);
   } catch (err) {
       const item = bot.inventory.findInventoryItem(itemByName.id);
       if (item?.count === item_count) {
-          bot.chat(
+          obs.chat(
               `Error placing ${name}: ${err.message}, please find another position to place`
           );
           _placeItemFailCount++;
@@ -72,7 +72,7 @@ async function placeItem(bot, name, position) {
               );
           }
       } else {
-          bot.chat(`Placed ${name}`);
+          obs.chat(`Placed ${name}`);
         //   bot.save(`${name}_placed`);
       }
   }

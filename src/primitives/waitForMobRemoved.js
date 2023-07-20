@@ -1,4 +1,4 @@
-function waitForMobRemoved(bot, entity, timeout = 300) {
+function waitForMobRemoved(bot, obs, entity, timeout = 300) {
   return new Promise((resolve, reject) => {
       let success = false;
       let droppedItem = null;
@@ -13,7 +13,7 @@ function waitForMobRemoved(bot, entity, timeout = 300) {
           if (e === entity) {
               success = true;
               clearTimeout(timeoutId);
-              bot.chat(`Killed ${entity.name}!`);
+              obs.chat(`Killed ${entity.name}!`);
               bot.pvp.stop();
           }
       }
@@ -41,7 +41,7 @@ function waitForMobRemoved(bot, entity, timeout = 300) {
 }
 
 
-function waitForMobShot(bot, entity, timeout = 300) {
+function waitForMobShot(bot, obs, entity, timeout = 300) {
   return new Promise((resolve, reject) => {
       let success = false;
       let droppedItem = null;
@@ -56,7 +56,7 @@ function waitForMobShot(bot, entity, timeout = 300) {
           if (e === entity) {
               success = true;
               clearTimeout(timeoutId);
-              bot.chat(`Shot ${entity.name}!`);
+              obs.chat(`Shot ${entity.name}!`);
               bot.hawkEye.stop();
           }
       }

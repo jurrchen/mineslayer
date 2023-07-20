@@ -1,4 +1,4 @@
-async function craftItem(bot, name, count = 1) {
+async function craftItem(bot, obs, name, count = 1) {
   // return if name is not string
   if (typeof name !== "string") {
       throw new Error("name for craftItem must be a string");
@@ -16,7 +16,7 @@ async function craftItem(bot, name, count = 1) {
       maxDistance: 32,
   });
   if (!craftingTable) {
-      bot.chat("Craft without a crafting table");
+      obs.chat("Craft without a crafting table");
   } else {
       await bot.pathfinder.goto(
           new GoalLookAtBlock(craftingTable.position, bot.world)
@@ -24,15 +24,15 @@ async function craftItem(bot, name, count = 1) {
   }
   const recipe = bot.recipesFor(itemByName.id, null, 1, craftingTable)[0];
   if (recipe) {
-      bot.chat(`I can make ${name}`);
+      obs.chat(`I can make ${name}`);
       try {
           await bot.craft(recipe, count, craftingTable);
-          bot.chat(`I did the recipe for ${name} ${count} times`);
+          obs.chat(`I did the recipe for ${name} ${count} times`);
       } catch (err) {
-          bot.chat(`I cannot do the recipe for ${name} ${count} times`);
+          obs.chat(`I cannot do the recipe for ${name} ${count} times`);
       }
   } else {
-      failedCraftFeedback(bot, name, itemByName, craftingTable);
+      failedCraftFeedback(bot, obs, name, itemByName, craftingTable);
       _craftItemFailCount++;
       if (_craftItemFailCount > 10) {
           throw new Error(

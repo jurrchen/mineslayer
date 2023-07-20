@@ -1,4 +1,4 @@
-async function mineBlock(bot, name, count = 1) {
+async function mineBlock(bot, obs, name, count = 1) {
   // return if name is not string
   if (typeof name !== "string") {
       throw new Error(`name for mineBlock must be a string`);
@@ -16,7 +16,7 @@ async function mineBlock(bot, name, count = 1) {
       count: 1024,
   });
   if (blocks.length === 0) {
-      bot.chat(`No ${name} nearby, please explore first`);
+      obs.chat(`No ${name} nearby, please explore first`);
       _mineBlockFailCount++;
       if (_mineBlockFailCount > 10) {
           throw new Error(

@@ -24,8 +24,9 @@ export default class Observer {
     this.error = e
   }
 
-  message(message) {
+  chat(message) {
     console.warn(message)
     this.logs.push(message)
+    this.bot.chat(message)
   }
 }

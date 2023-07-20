@@ -1,4 +1,4 @@
-async function getItemFromChest(bot, chestPosition, itemsToGet) {
+async function getItemFromChest(bot, obs, chestPosition, itemsToGet) {
   // return if chestPosition is not Vec3
   if (!(chestPosition instanceof Vec3)) {
       bot.chat("chestPosition for getItemFromChest must be a Vec3");
@@ -10,68 +10,68 @@ async function getItemFromChest(bot, chestPosition, itemsToGet) {
   for (const name in itemsToGet) {
       const itemByName = bot.registry.itemsByName[name];
       if (!itemByName) {
-          bot.chat(`No item named ${name}`);
+          obs.chat(`No item named ${name}`);
           continue;
       }
 
       const item = chest.findContainerItem(itemByName.id);
       if (!item) {
-          bot.chat(`I don't see ${name} in this chest`);
+          obs.chat(`I don't see ${name} in this chest`);
           continue;
       }
       try {
           await chest.withdraw(item.type, null, itemsToGet[name]);
       } catch (err) {
-          bot.chat(`Not enough ${name} in chest.`);
+          obs.chat(`Not enough ${name} in chest.`);
       }
   }
   await closeChest(bot, chestBlock);
 }
 
-async function depositItemIntoChest(bot, chestPosition, itemsToDeposit) {
+async function depositItemIntoChest(bot, obs, chestPosition, itemsToDeposit) {
   // return if chestPosition is not Vec3
   if (!(chestPosition instanceof Vec3)) {
       throw new Error(
           "chestPosition for depositItemIntoChest must be a Vec3"
       );
   }
-  await moveToChest(bot, chestPosition);
+  await moveToChest(bot, obs, chestPosition);
   const chestBlock = bot.blockAt(chestPosition);
   const chest = await bot.openContainer(chestBlock);
   for (const name in itemsToDeposit) {
       const itemByName = bot.registry.itemsByName[name];
       if (!itemByName) {
-          bot.chat(`No item named ${name}`);
+          obs.chat(`No item named ${name}`);
           continue;
       }
       const item = bot.inventory.findInventoryItem(itemByName.id);
       if (!item) {
-          bot.chat(`No ${name} in inventory`);
+          obs.chat(`No ${name} in inventory`);
           continue;
       }
       try {
           await chest.deposit(item.type, null, itemsToDeposit[name]);
       } catch (err) {
-          bot.chat(`Not enough ${name} in inventory.`);
+          obs.chat(`Not enough ${name} in inventory.`);
       }
   }
-  await closeChest(bot, chestBlock);
+  await closeChest(bot, obs, chestBlock);
 }
 
-async function checkItemInsideChest(bot, chestPosition) {
+async function checkItemInsideChest(bot, obs, chestPosition) {
   // return if chestPosition is not Vec3
   if (!(chestPosition instanceof Vec3)) {
       throw new Error(
           "chestPosition for depositItemIntoChest must be a Vec3"
       );
   }
-  await moveToChest(bot, chestPosition);
+  await moveToChest(bot, obs, chestPosition);
   const chestBlock = bot.blockAt(chestPosition);
   await bot.openContainer(chestBlock);
-  await closeChest(bot, chestBlock);
+  await closeChest(bot, obs, chestBlock);
 }
 
-async function moveToChest(bot, chestPosition) {
+async function moveToChest(bot, obs, chestPosition) {
   if (!(chestPosition instanceof Vec3)) {
       throw new Error(
           "chestPosition for depositItemIntoChest must be a Vec3"
@@ -96,7 +96,7 @@ async function moveToChest(bot, chestPosition) {
   return chestBlock;
 }
 
-async function listItemsInChest(bot, chestBlock) {
+async function listItemsInChest(bot, obs, chestBlock) {
   const chest = await bot.openContainer(chestBlock);
   const items = chest.containerItems();
   if (items.length > 0) {
@@ -115,9 +115,9 @@ async function listItemsInChest(bot, chestBlock) {
   return chest;
 }
 
-async function closeChest(bot, chestBlock) {
+async function closeChest(bot, obs, chestBlock) {
   try {
-      const chest = await listItemsInChest(bot, chestBlock);
+      const chest = await listItemsInChest(bot, obs, chestBlock);
       await chest.close();
   } catch (err) {
       await bot.closeWindow(chestBlock);

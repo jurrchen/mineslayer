@@ -1,4 +1,4 @@
-async function killMob(bot, mobName, timeout = 300) {
+async function killMob(bot, obs, mobName, timeout = 300) {
   // return if mobName is not string
   if (typeof mobName !== "string") {
       throw new Error(`mobName for killMob must be a string`);
@@ -26,7 +26,7 @@ async function killMob(bot, mobName, timeout = 300) {
           entity.position.distanceTo(bot.entity.position) < 48
   );
   if (!entity) {
-      bot.chat(`No ${mobName} nearby, please explore first`);
+      obs.chat(`No ${mobName} nearby, please explore first`);
       _killMobFailCount++;
       if (_killMobFailCount > 10) {
           throw new Error(
@@ -39,10 +39,10 @@ async function killMob(bot, mobName, timeout = 300) {
   let droppedItem;
   if (mainHandItem && weaponsForShooting.includes(mainHandItem.name)) {
       bot.hawkEye.autoAttack(entity, mainHandItem.name);
-      droppedItem = await waitForMobShot(bot, entity, timeout);
+      droppedItem = await waitForMobShot(bot, obs, entity, timeout);
   } else {
       await bot.pvp.attack(entity);
-      droppedItem = await waitForMobRemoved(bot, entity, timeout);
+      droppedItem = await waitForMobRemoved(bot, obs, entity, timeout);
   }
   if (droppedItem) {
       await bot.collectBlock.collect(droppedItem, { ignoreNoPath: true });

@@ -4,7 +4,7 @@ Here are some useful programs written with Mineflayer APIs.
 
 /*
 Explore until find an iron_ore, use Vec3(0, -1, 0) because iron ores are usually underground
-await exploreUntil(bot, new Vec3(0, -1, 0), 60, () => {
+await exploreUntil(bot, obs, new Vec3(0, -1, 0), 60, () => {
     const iron_ore = bot.findBlock({
         matching: bot.registry.blocksByName["iron_ore"].id,
         maxDistance: 32,
@@ -13,7 +13,7 @@ await exploreUntil(bot, new Vec3(0, -1, 0), 60, () => {
 });
 
 Explore until find a pig, use Vec3(1, 0, 1) because pigs are usually on the surface
-let pig = await exploreUntil(bot, new Vec3(1, 0, 1), 60, () => {
+let pig = await exploreUntil(bot, obs, new Vec3(1, 0, 1), 60, () => {
     const pig = bot.nearestEntity((entity) => {
         return (
             entity.name === "pig" &&
@@ -23,7 +23,7 @@ let pig = await exploreUntil(bot, new Vec3(1, 0, 1), 60, () => {
     return pig;
 });
 */
-async function exploreUntil(bot, direction, maxTime = 60, callback) {
+async function exploreUntil(bot, obs, direction, maxTime = 60, callback) {
     /*
     Implementation of this function is omitted.
     direction: Vec3, can only contain value of -1, 0 or 1
@@ -34,8 +34,8 @@ async function exploreUntil(bot, direction, maxTime = 60, callback) {
     */
 }
 
-// Mine 3 cobblestone: mineBlock(bot, "stone", 3);
-async function mineBlock(bot, name, count = 1) {
+// Mine 3 cobblestone: mineBlock(bot, obs, "stone", 3);
+async function mineBlock(bot, obs, name, count = 1) {
     const blocks = bot.findBlocks({
         matching: (block) => {
             return block.name === name;
@@ -50,9 +50,9 @@ async function mineBlock(bot, name, count = 1) {
     await bot.collectBlock.collect(targets, { ignoreNoPath: true });
 }
 
-// Craft 8 oak_planks from 2 oak_log (do the recipe 2 times): craftItem(bot, "oak_planks", 2);
+// Craft 8 oak_planks from 2 oak_log (do the recipe 2 times): craftItem(bot, obs, "oak_planks", 2);
 // You must place a crafting table before calling this function
-async function craftItem(bot, name, count = 1) {
+async function craftItem(bot, obs, name, count = 1) {
     const item = bot.registry.itemsByName[name];
     const craftingTable = bot.findBlock({
         matching: bot.registry.blocksByName.crafting_table.id,
@@ -66,8 +66,8 @@ async function craftItem(bot, name, count = 1) {
 }
 
 
-// Place a crafting_table near the player, Vec3(1, 0, 0) is just an example, you shouldn't always use that: placeItem(bot, "crafting_table", bot.entity.position.offset(1, 0, 0));
-async function placeItem(bot, name, position) {
+// Place a crafting_table near the player, Vec3(1, 0, 0) is just an example, you shouldn't always use that: placeItem(bot, obs, "crafting_table", bot.entity.position.offset(1, 0, 0));
+async function placeItem(bot, obs, name, position) {
     const item = bot.inventory.findInventoryItem(bot.registry.itemsByName[name].id);
     // find a reference block
     const faceVectors = [
@@ -96,9 +96,9 @@ async function placeItem(bot, name, position) {
 }
 
 
-// Smelt 1 raw_iron into 1 iron_ingot using 1 oak_planks as fuel: smeltItem(bot, "raw_iron", "oak_planks");
+// Smelt 1 raw_iron into 1 iron_ingot using 1 oak_planks as fuel: smeltItem(bot, obs, "raw_iron", "oak_planks");
 // You must place a furnace before calling this function
-async function smeltItem(bot, itemName, fuelName, count = 1) {
+async function smeltItem(bot, obs, itemName, fuelName, count = 1) {
     const item = bot.registry.itemsByName[itemName];
     const fuel = bot.registry.itemsByName[fuelName];
     const furnaceBlock = bot.findBlock({
@@ -120,8 +120,8 @@ async function smeltItem(bot, itemName, fuelName, count = 1) {
 }
 
 
-// Kill a pig and collect the dropped item: killMob(bot, "pig", 300);
-async function killMob(bot, mobName, timeout = 300) {
+// Kill a pig and collect the dropped item: killMob(bot, obs, "pig", 300);
+async function killMob(bot, obs, mobName, timeout = 300) {
     const entity = bot.nearestEntity(
         (entity) =>
             entity.name === mobName &&
@@ -134,10 +134,10 @@ async function killMob(bot, mobName, timeout = 300) {
 }
 
 
-// Get a torch from chest at (30, 65, 100): getItemFromChest(bot, new Vec3(30, 65, 100), {"torch": 1});
+// Get a torch from chest at (30, 65, 100): getItemFromChest(bot, obs, new Vec3(30, 65, 100), {"torch": 1});
 // This function will work no matter how far the bot is from the chest.
-async function getItemFromChest(bot, chestPosition, itemsToGet) {
-    await moveToChest(bot, chestPosition);
+async function getItemFromChest(bot, obs, chestPosition, itemsToGet) {
+    await moveToChest(bot, obs, chestPosition);
     const chestBlock = bot.blockAt(chestPosition);
     const chest = await bot.openContainer(chestBlock);
     for (const name in itemsToGet) {
@@ -145,12 +145,12 @@ async function getItemFromChest(bot, chestPosition, itemsToGet) {
         const item = chest.findContainerItem(itemByName.id);
         await chest.withdraw(item.type, null, itemsToGet[name]);
     }
-    await closeChest(bot, chestBlock);
+    await closeChest(bot, obs, chestBlock);
 }
-// Deposit a torch into chest at (30, 65, 100): depositItemIntoChest(bot, new Vec3(30, 65, 100), {"torch": 1});
+// Deposit a torch into chest at (30, 65, 100): depositItemIntoChest(bot, obs, new Vec3(30, 65, 100), {"torch": 1});
 // This function will work no matter how far the bot is from the chest.
-async function depositItemIntoChest(bot, chestPosition, itemsToDeposit) {
-    await moveToChest(bot, chestPosition);
+async function depositItemIntoChest(bot, obs, chestPosition, itemsToDeposit) {
+    await moveToChest(bot, obs, chestPosition);
     const chestBlock = bot.blockAt(chestPosition);
     const chest = await bot.openContainer(chestBlock);
     for (const name in itemsToDeposit) {
@@ -158,16 +158,16 @@ async function depositItemIntoChest(bot, chestPosition, itemsToDeposit) {
         const item = bot.inventory.findInventoryItem(itemByName.id);
         await chest.deposit(item.type, null, itemsToDeposit[name]);
     }
-    await closeChest(bot, chestBlock);
+    await closeChest(bot, obs, chestBlock);
 }
-// Check the items inside the chest at (30, 65, 100): checkItemInsideChest(bot, new Vec3(30, 65, 100));
+// Check the items inside the chest at (30, 65, 100): checkItemInsideChest(bot, obs, new Vec3(30, 65, 100));
 // You only need to call this function once without any action to finish task of checking items inside the chest.
-async function checkItemInsideChest(bot, chestPosition) {
-    await moveToChest(bot, chestPosition);
+async function checkItemInsideChest(bot, obs, chestPosition) {
+    await moveToChest(bot, obs, chestPosition);
     const chestBlock = bot.blockAt(chestPosition);
     await bot.openContainer(chestBlock);
     // You must close the chest after opening it if you are asked to open a chest
-    await closeChest(bot, chestBlock);
+    await closeChest(bot, obs, chestBlock);
 }
 
 
@@ -215,18 +215,18 @@ You should then respond to me with
 Explain (if applicable): Are there any steps missing in your plan? Why does the code not complete the task? What does the chat log and execution error imply?
 Plan: How to complete the task step by step. You should pay attention to Inventory since it tells what you have. The task completeness check is also based on your final inventory.
 Code:
-    1) Write an async function taking the bot as the only argument.
+    1) Write an async function taking bot and obs as the only two arguments.
     2) Reuse the above useful programs as much as possible.
-        - Use `mineBlock(bot, name, count)` to collect blocks. Do not use `bot.dig` directly.
-        - Use `craftItem(bot, name, count)` to craft items. Do not use `bot.craft` or `bot.recipesFor` directly.
-        - Use `smeltItem(bot, name count)` to smelt items. Do not use `bot.openFurnace` directly.
-        - Use `placeItem(bot, name, position)` to place blocks. Do not use `bot.placeBlock` directly.
-        - Use `killMob(bot, name, timeout)` to kill mobs. Do not use `bot.attack` directly.
+        - Use `mineBlock(bot, obs, name, count)` to collect blocks. Do not use `bot.dig` directly.
+        - Use `craftItem(bot, obs, name, count)` to craft items. Do not use `bot.craft` or `bot.recipesFor` directly.
+        - Use `smeltItem(bot, obs, name count)` to smelt items. Do not use `bot.openFurnace` directly.
+        - Use `placeItem(bot, obs, name, position)` to place blocks. Do not use `bot.placeBlock` directly.
+        - Use `killMob(bot, obs, name, timeout)` to kill mobs. Do not use `bot.attack` directly.
     3) Your function will be reused for building more complex functions. Therefore, you should make it generic and reusable. You should not make strong assumption about the inventory (as it may be changed at a later time), and therefore you should always check whether you have the required items before using them. If not, you should first collect the required items and reuse the above useful programs.
     4) Functions in the "Code from the last round" section will not be saved or executed. Do not reuse functions listed there.
     5) Anything defined outside a function will be ignored, define all your variables inside your functions.
-    6) Call `bot.chat` to show the intermediate progress.
-    7) Use `exploreUntil(bot, direction, maxDistance, callback)` when you cannot find something. You should frequently call this before mining blocks or killing mobs. You should select a direction at random every time instead of constantly using (1, 0, 1).
+    6) Call `obs.chat` to show the intermediate progress. Be as verbose as possible.
+    7) Use `exploreUntil(bot, obs, direction, maxDistance, callback)` when you cannot find something. You should frequently call this before mining blocks or killing mobs. You should select a direction at random every time instead of constantly using (1, 0, 1).
     8) `maxDistance` should always be 32 for `bot.findBlocks` and `bot.findBlock`. Do not cheat.
     9) Do not write infinite loops or recursive functions.
     10) Do not use `bot.on` or `bot.once` to register event listeners. You definitely do not need them.
