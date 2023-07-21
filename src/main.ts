@@ -2,9 +2,10 @@ import * as mineflayer from 'mineflayer';
 import { mineflayer as  mineflayerViewer } from 'prismarine-viewer';
 import { goals } from "mineflayer-pathfinder";
 import inventoryViewer from 'mineflayer-web-inventory'
-import { runCompletion, runExec } from './run';
+import { runExec } from './exec';
 import Observer from './obs';
 import stringArgv from 'string-argv';
+import PlanManager from './plan';
 
 const bot = mineflayer.createBot({
   host: 'localhost',
@@ -13,7 +14,7 @@ const bot = mineflayer.createBot({
   accessToken: '123'
 });
 
-
+const planManager = new PlanManager(bot);
 
 /**
  * Fetch next command
@@ -72,7 +73,8 @@ async function mineOre(bot, obs) {
    * GPT
    */
   // await planCompletion(bot, message);
-  await runCompletion(bot, message);
+  await planManager.runProject(message);
+  // await runCompletion(bot, message);
 })
 
 // Log errors and kick reasons:

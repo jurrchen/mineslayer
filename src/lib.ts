@@ -88,3 +88,26 @@ export function getTime(bot) {
 
   return time;
 }
+
+export function getBasicObservations(bot) {
+  const inventoryUsed = bot.inventory.slots.filter((slot) => slot).length
+  const inventory = bot.inventory.items().map((item) => `${item.name}:${item.count}`).join(', ')
+  const biome = bot.blockAt(bot.entity.position)?.biome?.name || 'Unknown'
+  const time = getTime(bot);
+  const equipment = getEquipment(bot).join(', ');
+  const entities = getEntities(bot); // TODO: figure out mapping dict
+  const blocks = [...getSurroundingBlocks(bot, 8, 2, 8)]
+  
+  const observations = `Biome: ${biome}
+Time: ${time}
+Nearby blocks: ${blocks}
+Nearby entities (nearest to farthest): ${JSON.stringify(entities)}
+Health: ${bot.health}/20
+Hunger: ${bot.food}/20
+Position: x=${bot.entity.position.x}, y=${bot.entity.position.y}, z=${bot.entity.position.z}
+Inventory (${inventoryUsed}/36): ${inventory}
+Equipment: ${equipment}
+Chests: (Unknown)`;
+
+  return observations;
+}
