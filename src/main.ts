@@ -6,6 +6,7 @@ import { runExec } from './exec';
 import Observer from './obs';
 import stringArgv from 'string-argv';
 import PlanManager from './plan';
+import './honeycomb';
 
 const bot = mineflayer.createBot({
   host: 'localhost',
@@ -89,9 +90,7 @@ bot.on('chat', async (username, message) => {
   /**
    * GPT
    */
-  // await planCompletion(bot, message);
   await planManager.runProject(message);
-  // await runCompletion(bot, message);
 })
 
 // Log errors and kick reasons:

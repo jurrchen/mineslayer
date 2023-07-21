@@ -2,6 +2,7 @@ import * as fs from 'fs'
 import { Bot } from 'mineflayer';
 import Observer from './obs';
 import * as babel from '@babel/core';
+import { trace } from '@opentelemetry/api';
 
 const CRAFT_HELPER = fs.readFileSync("./src/primitives/craftHelper.js", "utf-8");
 const CRAFT_ITEM = fs.readFileSync("./src/primitives/craftItem.js", "utf-8");
@@ -20,13 +21,10 @@ function getFunctionName(code: string) {
   return parsed.reverse()[0].id.name;
 }
 
-export default class ExecutionEngine {
-
-
-}
-
 // keep function for now
 export async function runExec(bot: Bot, obs: Observer, code: string) {
+  const tracer = trace.getTracer('voyager')
+
   obs.setCode(code)
   // first function is what gets run
   // TODO: handle multiple functions
@@ -60,12 +58,26 @@ export async function runExec(bot: Bot, obs: Observer, code: string) {
   ${functionName}(bot, obs);
   `;
 
-  try {
-    bot.chat('Running code');
-    await eval(program)
-    bot.chat('Done.')
-  } catch(e) {
-    obs.setError(e)
-    return e
-  }
+  return tracer.startActiveSpan('exec', {
+    attributes: {
+      code,
+    }
+  }, async (span) => {  
+    try {
+      bot.chat('Running code');
+      await eval(program)
+      bot.chat('Done.')
+    } catch(e) {
+      console.warn('CAUGHT ERROR')
+      obs.setError(e)
+      span.addEvent('error.exec', {
+        error: e.name,
+        stack: e.stack,
+        message: e.message
+      })
+      return e
+    } finally {
+      span.end()
+    }
+  })
 }

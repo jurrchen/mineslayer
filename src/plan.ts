@@ -4,6 +4,7 @@ import { getBasicObservations } from "./lib";
 import { openAICompletion } from "./openai";
 import * as jsYAML from "js-yaml";
 import TaskManager from "./task";
+import { trace } from '@opentelemetry/api';
 
 const PROMPT = readFileSync("./src/prompts/plan.txt", "utf-8");
 
@@ -18,52 +19,81 @@ export default class PlanManager {
     this.taskManager = new TaskManager(bot);
   }
 
-  async runProject(message: string) {
+  async runProject(message: string) {    
 
-    if (!!this.currentProject) {
-      this.bot.chat(`Already running a project ${message}`)
-      return
-    }
+    const tracer = trace.getTracer('voyager')
 
-    this.currentProject = message;
-    this.bot.chat(`I'm thinking....`);
+    return await tracer.startActiveSpan('project', {
+      attributes: {
+        'text': message
+      }
+    }, async (span) => {
 
-    const prompt = `
-${getBasicObservations(this.bot)}
-Project: ${message}
-    `;
+      console.warn('===TRACE ID===')
+      console.warn(span.spanContext().traceId)
+      console.warn('==============')
 
-    console.log(prompt);
+      if (!!this.currentProject) {
+        this.bot.chat(`Already running a project ${this.currentProject}`)
+        return
+      }
+  
+      this.currentProject = message;
+      this.bot.chat(`I'm thinking....`);
+  
+      const prompt = `
+  ${getBasicObservations(this.bot)}
+  Project: ${message}
+      `;
+      
+      const yaml = await tracer.startActiveSpan('openai.plan', {
+        attributes: {
+          prompt,
+        }
+      }, async (span) => {
+        const chatCompletion = await openAICompletion(PROMPT, prompt);
+        const responseContent = chatCompletion.data.choices[0].message.content;
 
-    const chatCompletion = await openAICompletion(PROMPT, prompt);
+        span.addEvent('openai.plan.response', {
+          response: responseContent
+        })
 
-    const responseContent = chatCompletion.data.choices[0].message.content;
+        console.warn('===Plan===')
+        console.log(responseContent)
+        console.warn('============')        
 
-    console.log(responseContent);
+        // Project to tasks    
+        const regex = /```yaml(.*?)```/gs;
+        const match = regex.exec(responseContent);
+        if (!match) {
+          throw new Error("No code found in response");
+        }
 
-    // Project to tasks    
-    const regex = /```yaml(.*?)```/gs;
-    const match = regex.exec(responseContent);
-    if (!match) {
-      throw new Error("No code found in response");
-    }
-    const yaml = jsYAML.load(match[1]);
+        span.end()
+        return jsYAML.load(match[1]);
+      })
+    
+      this.bot.chat(`Got ${yaml.length} tasks.`);
 
-    this.bot.chat(`Got ${yaml.length} tasks.`);
+      span.addEvent('plan.started', {
+        tasks: JSON.stringify(yaml),
+        count: yaml.length,
+      })
 
-    for (const { task } of yaml) {
-      console.log(`Task started: ${task}`);
-
-      // retry logic here
-      await this.taskManager.runTask(task);
-
-      console.log(`Task done: ${task}`);      
-    }
-
-    // TODO: replanning
-
-    this.currentProject = null;
-
+      try {
+        for (const { task } of yaml) {
+          console.log(`Task started: ${task}`);
+          // retry logic here
+          await this.taskManager.runTask(task);    
+          console.log(`Task done: ${task}`);      
+        }
+      } catch(e) {
+        console.warn('Plan errored out')
+      } finally {
+        span.end()
+        this.currentProject = null;
+      }
+    })
   }
 
 }
