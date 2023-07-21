@@ -97,11 +97,26 @@ export function getBasicObservations(bot) {
   const equipment = getEquipment(bot).join(', ');
   const entities = getEntities(bot); // TODO: figure out mapping dict
   const blocks = [...getSurroundingBlocks(bot, 8, 2, 8)]
+
+  const craftingTable = bot.findBlock({
+    matching: bot.registry.blocksByName.crafting_table.id,
+    within: 32,
+  });
+
+  const furnace = bot.findBlock({
+    matching: bot.registry.blocksByName.furnace.id,
+    within: 32,
+  });
+
+  const craftingTablePos = craftingTable ? `x=${craftingTable.position.x}, y=${craftingTable.position.y}, z=${craftingTable.position.z}` : '(None)'
+  const furnacePos = furnace ? `x=${furnace.position.x}, y=${furnace.position.y}, z=${furnace.position.z}` : '(None)'
   
   const observations = `Biome: ${biome}
 Time: ${time}
 Nearby blocks: ${blocks}
 Nearby entities (nearest to farthest): ${JSON.stringify(entities)}
+Nearby crafting table: ${craftingTablePos}
+Nearby furnace: ${furnacePos}
 Health: ${bot.health}/20
 Hunger: ${bot.food}/20
 Position: x=${bot.entity.position.x}, y=${bot.entity.position.y}, z=${bot.entity.position.z}

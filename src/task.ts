@@ -22,11 +22,11 @@ export default class TaskManager {
     const tracer = trace.getTracer('voyager')
 
     const prompt = `
-    Code from the last round: ${previousObs?.code || "(None)"}
-    Execution error: ${previousObs?.error?.toString() || "(None)"}
-    Chat log: ${previousObs?.logs.join('\n') || "(None)"}
-    ${getBasicObservations(this.bot)}
-    Task: ${task}
+Code from the last round: ${previousObs?.code || "(None)"}
+Execution error: ${previousObs?.error?.toString() || "(None)"}
+Chat log: ${previousObs?.logs.join('\n') || "(None)"}
+${getBasicObservations(this.bot)}
+Task: ${task}
         `
   
     this.bot.chat(`Task: ${task}...`)    
@@ -75,7 +75,6 @@ export default class TaskManager {
   
       if(e) {
         // TODO: retries
-  
         console.warn(e.toString())
         console.warn(e.stack)
   
