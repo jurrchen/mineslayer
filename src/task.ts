@@ -54,6 +54,11 @@ Task: ${task}
 
     if(e) {
       // TODO: retries
+
+      console.warn(e.toString())
+      console.warn(e.stack)
+
+
       throw new Error(`Task failed: ${task}`)
 
       // // try again

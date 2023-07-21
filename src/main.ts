@@ -49,10 +49,23 @@ bot.on('chat', async (username, message) => {
 
     if (parsed[0] === '!debug')  {
       const code = `
-async function mineOre(bot, obs) {
-  await mineBlock(bot, obs, "diamond_ore", 1);
-  bot.chat('mined ore')
-}
+      async function craftCraftingTable(bot) {
+        // get the item counts in inventory
+        var planksCount = bot.inventory.count("oak_planks");
+        var logCount = bot.inventory.count("oak_log");
+    
+        // check if we have enough planks ready else we craft planks from log
+        if(planksCount < 4){
+            await craftItem(bot, "oak_planks", Math.ceil((4 - planksCount)/4));
+            planksCount = bot.inventory.count("oak_planks"); 
+        }
+    
+        if(planksCount >= 4){
+            await craftItem(bot, "crafting_table", 1);
+        }else{
+            obs.chat("Cannot craft crafting table due to lack of oak planks");
+        }
+    }
       `
 
       // create observability object
@@ -61,6 +74,10 @@ async function mineOre(bot, obs) {
       await runExec(bot, obs, code)
 
       // TODO: can test repairs
+      console.warn(obs.error.toString())
+      console.warn(obs.error.message)
+      console.warn(obs.error.name)
+      console.warn(obs.error.stack)
 
       return;
     }

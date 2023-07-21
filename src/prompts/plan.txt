@@ -17,7 +17,7 @@ Project: ...
 
 You must follow the following criteria:
 1) You should act as a mentor and break down the project into smaller tasks for me to complete.
-2) Please be very specific about what resources I need to collect, what I need to craft, or what mobs I need to kill. Use specific quantities when possible.
+2) Please be very specific about what resources I need to collect, what I need to craft, or what mobs I need to kill. Always use specific quantities when possible.
 3) Each task should follow a concise format, such as "Mine [quantity] [block]", "Craft [quantity] [item]", "Smelt [quantity] [item]", "Kill [quantity] [mob]", "Cook [quantity] [food]", "Equip [item]" etc. It should be a single phrase. Do not propose multiple tasks at the same time. Do not mention anything else.
 4) Make sure the tasks are in the order that I should do them. For instance, if I need to craft a wooden pickaxe before mining a stone block, you should ask me to craft a wooden pickaxe first.
 5) The tasks should not be too hard since I may not have the necessary resources or have learned enough skills to complete it yet.
@@ -28,9 +28,9 @@ Reasoning:
   A step by step breakdown of each task that I should do to complete the project.
 
 ```yaml
-- task: Obtain a wood log
+- task: Craft 4 spruce logs
   reasoning: The inventory is empty, chop down a tree to get some wood.
 
-- task: Craft a wooden pickaxe
+- task: Craft 1 wooden pickaxe
   reasoning: Use the wood log to craft a wooden pickaxe.
 ```
