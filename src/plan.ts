@@ -46,13 +46,7 @@ export default class PlanManager {
         let lastCritique = null;
 
         while(!projectCompleted) {
-          const tasks = await runPlan3(this.bot, project, lastTask, lastCritique)
-
-          const { task, reasoning } = tasks[0];
-          console.log(`Total of ${tasks.length} tasks`);
-          console.log('==============');
-          console.log(tasks);
-          console.log('==============');
+          const { task, reasoning } = await runPlan2(this.bot, project, lastTask, lastCritique);
 
           this.bot.chat(`Got task: ${task}.`);
 
@@ -84,8 +78,8 @@ export default class PlanManager {
           }
         }
       } catch(e) {
-        // TODO: dealing with errors for real
-        console.warn('Task errored out')
+        // TODO: What are these errors then?
+        console.warn('Task errored out', e.name, e.message)
       } finally {
         span.end()
         this.currentProject = null;

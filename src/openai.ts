@@ -131,7 +131,13 @@ export async function runPlan3(bot: Bot, message: string, lastTask: string | nul
     }
 
     span.end()
-    return jsYAML.load(match[1]);
+    const tasks = jsYAML.load(match[1]);
+    console.log(`Total of ${tasks.length} tasks`);
+    console.log('==============');
+    console.log(tasks);
+    console.log('==============');
+
+    return tasks[0];
   })
 }
 
