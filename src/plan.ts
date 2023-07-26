@@ -1,12 +1,7 @@
 import { Bot } from "mineflayer"
-import { readFileSync } from "fs"
-import { getBasicObservations } from "./lib";
-import { openAICompletion } from "./openai";
-import * as jsYAML from "js-yaml";
+import { runPlan2, runCritic, runPlan3 } from "./openai";
 import TaskManager from "./task";
 import { trace } from '@opentelemetry/api';
-
-const PROMPT = readFileSync("./src/prompts/plan.txt", "utf-8");
 
 export default class PlanManager {
 
@@ -19,13 +14,13 @@ export default class PlanManager {
     this.taskManager = new TaskManager(bot);
   }
 
-  async runProject(message: string) {    
+  async runProject(project: string) {    
 
     const tracer = trace.getTracer('voyager')
 
     return await tracer.startActiveSpan('project', {
       attributes: {
-        'text': message
+        'text': project
       }
     }, async (span) => {
 
@@ -38,62 +33,63 @@ export default class PlanManager {
         return
       }
   
-      this.currentProject = message;
+      this.currentProject = project;
       this.bot.chat(`I'm thinking....`);
-  
-      const prompt = `
-  ${getBasicObservations(this.bot)}
-  Project: ${message}
-      `;
-      
-      const yaml = await tracer.startActiveSpan('openai.plan', {
-        attributes: {
-          prompt,
-        }
-      }, async (span) => {
-        const chatCompletion = await openAICompletion(PROMPT, prompt);
-        const responseContent = chatCompletion.data.choices[0].message.content;
 
-        span.addEvent('openai.plan.response', {
-          response: responseContent
-        })
 
-        console.warn('===Plan===')
-        console.log(responseContent)
-        console.warn('============')        
+      // looping this
 
-        // Project to tasks    
-        const regex = /```yaml(.*?)```/gs;
-        const match = regex.exec(responseContent);
-        if (!match) {
-          throw new Error("No code found in response");
-        }
-
-        span.end()
-        return jsYAML.load(match[1]);
-      })
-    
-      this.bot.chat(`Got ${yaml.length} tasks.`);
-
-      span.addEvent('plan.started', {
-        tasks: JSON.stringify(yaml),
-        count: yaml.length,
-      })
+      let projectCompleted = false;
 
       try {
-        for (const { task } of yaml) {
+        let lastTask = null;
+        let lastCritique = null;
+
+        while(!projectCompleted) {
+          const tasks = await runPlan3(this.bot, project, lastTask, lastCritique)
+
+          const { task, reasoning } = tasks[0];
+          console.log(`Total of ${tasks.length} tasks`);
+          console.log('==============');
+          console.log(tasks);
+          console.log('==============');
+
+          this.bot.chat(`Got task: ${task}.`);
+
           console.log(`Task started: ${task}`);
           // retry logic here
-          await this.taskManager.runTask(task);    
-          console.log(`Task done: ${task}`);      
+          const { success, critique } = await this.taskManager.runTask(task, reasoning);
+
+          if (!success) {
+            // Try again at task level?
+            console.log(`Task failed: ${task}`)
+            projectCompleted = false;
+            lastTask = task;
+            lastCritique = critique;
+            // pass critique
+          } else {
+            console.log(`Task done: ${task}`);
+            // if task succeeded, run project critique
+            console.log('Task successful. Running project critique');
+            const { success, critique } = await runCritic(this.bot, project);
+            projectCompleted = success;
+            lastTask = task;
+            lastCritique = critique;
+            // move forward, passing critique to next task
+            if (projectCompleted) {
+              this.bot.chat(`Project complete!`)
+            } else {
+              this.bot.chat(`Project not complete. Moving on to next task.`)
+            }
+          }
         }
       } catch(e) {
-        console.warn('Plan errored out')
+        // TODO: dealing with errors for real
+        console.warn('Task errored out')
       } finally {
         span.end()
         this.currentProject = null;
       }
     })
   }
-
 }
