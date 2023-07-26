@@ -7,6 +7,7 @@ import Observer from './obs';
 import stringArgv from 'string-argv';
 import PlanManager from './plan';
 import './honeycomb';
+import { AppDataSource } from './code';
 
 const bot = mineflayer.createBot({
   host: 'localhost',
@@ -99,7 +100,7 @@ bot.on('error', console.log)
 
 
 // take in text
-bot.once('spawn', () => {
+bot.once('spawn', async () => {
   const { pathfinder } = require("mineflayer-pathfinder");
   const tool = require("mineflayer-tool").plugin;
   const collectBlock = require("./collectblock").plugin;
@@ -110,6 +111,8 @@ bot.once('spawn', () => {
   bot.loadPlugin(collectBlock);
   bot.loadPlugin(pvp);
   bot.loadPlugin(minecraftHawkEye);
+
+  await AppDataSource.initialize().catch((error) => console.log(error))
 
   inventoryViewer(bot, {
     port: 3006

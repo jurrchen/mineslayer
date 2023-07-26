@@ -5,6 +5,7 @@ import { openAICompletion, runCritic } from "./openai";
 import { runExec } from "./exec";
 import { readFileSync } from "fs";
 import { trace } from '@opentelemetry/api';
+import { storeCode } from "./code";
 
 const PROMPT = readFileSync("./src/prompts/code.txt", "utf-8");
 
@@ -18,7 +19,7 @@ export default class TaskManager {
     // this.executionEngine = new ExecutionEngine();
   }
 
-  private async runPrompt(obs: Observer, task: string, previousObs: Observer | null, prevCritique: string | null): Promise<{ success: boolean, critique: string }> {  
+  private async runPrompt(obs: Observer, task: string, previousObs: Observer | null, prevCritique: string | null): Promise<{ success: boolean, critique: string, code: string, attemptId: string }> {  
     const tracer = trace.getTracer('voyager')
 
     const prompt = `
@@ -32,7 +33,7 @@ Task: ${task}
   
     this.bot.chat(`Task: ${task}...`)    
 
-    const code = await tracer.startActiveSpan('openai.task', {
+    return await tracer.startActiveSpan('openai.task', {
       attributes: {
         prompt,
       }
@@ -52,25 +53,27 @@ Task: ${task}
       const match = regex.exec(responseContent);
       if (!match) {
         throw new Error("No code found in response");
+      }      
+
+      const code = match[1];
+      const attemptId = span.spanContext().spanId;
+
+      const e = await runExec(this.bot, obs, code);
+
+      if (e) {
+        return {
+          success: false,
+          critique: `Error: ${e.name} ${e.message}`,
+          code,
+          attemptId,
+        }
       }
 
-      span.end()
-      return match[1];
+      console.log('Running critique');
+      const { success, critique } = await runCritic(this.bot, task);
+  
+      return { success, critique, code, attemptId };
     })
-
-    const e = await runExec(this.bot, obs, code);
-
-    if (e) {
-      return {
-        success: false,
-        critique: `Error: ${e.name} ${e.message}`
-      }
-    }
-
-    console.log('Running critique');
-    const { success, critique } = await runCritic(this.bot, task);
-
-    return { success, critique }    
   }
 
   async runTask(task: string, reasoning: string) {
@@ -86,9 +89,17 @@ Task: ${task}
       let lastObservation = null;
       let lastCritique = null;
       const MAX_ATTEMPTS = 2;
+
+      const traceId = span.spanContext().traceId;
+      const parentId = span.spanContext().spanId;
+
       while(!completed && attempts < MAX_ATTEMPTS) {
-        const obs = new Observer(this.bot);        
-        const { success, critique } = await this.runPrompt(obs, task, lastObservation, lastCritique);
+        const obs = new Observer(this.bot);
+
+        const { success, critique, code, attemptId } = await this.runPrompt(obs, task, lastObservation, lastCritique);
+
+        // store code here?
+        await storeCode(traceId, parentId, attemptId, code, success, critique)
 
         attempts++;
         completed = success;

@@ -1,0 +1,11 @@
+version: "3.8"
+services:
+  sourcescape_postgres:
+    container_name: meeseeks_postgres
+    image: postgres:12.4
+    environment:
+      - POSTGRES_PASSWORD=meeseeks
+      - POSTGRES_DB=meeseeks
+      - POSTGRES_USER=meeseeks
+    ports:
+      - "5432:5432"
